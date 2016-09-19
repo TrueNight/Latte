@@ -19,7 +19,7 @@ package xyz.truenight.latte;
 import java.lang.annotation.Annotation;
 
 /**
- * Given a type T, looks for the annotations {@link UseAdapter}, {@link CollectionContains} and uses an instance of the
+ * Given a type T, looks for the annotations {@link UseAdapter}, {@link UnorderedCollection} and uses an instance of the
  * specified class as the default type adapter.
  */
 public final class AnnotationTypeAdapterFactory implements TypeAdapterFactory {
@@ -33,8 +33,8 @@ public final class AnnotationTypeAdapterFactory implements TypeAdapterFactory {
     @SuppressWarnings("unchecked")
     public <T> TypeAdapter<T> create(TypeToken<T> targetType) {
         UseAdapter annotation = targetType.getRawType().getAnnotation(UseAdapter.class);
-        CollectionContains collectionContainsAnnotation = targetType.getRawType().getAnnotation(CollectionContains.class);
-        if (annotation == null && collectionContainsAnnotation == null) {
+        UnorderedCollection unorderedCollectionAnnotation = targetType.getRawType().getAnnotation(UnorderedCollection.class);
+        if (annotation == null && unorderedCollectionAnnotation == null) {
             return null;
         }
         if (annotation != null) {
@@ -79,6 +79,6 @@ public final class AnnotationTypeAdapterFactory implements TypeAdapterFactory {
     static TypeAdapter<?> getCollectionContainsTypeAdapter(ConstructorConstructor constructorConstructor,
                                                            TypeToken<?> fieldType) {
 
-        return CollectionContainsTypeAdapter.newFactory(constructorConstructor).create(fieldType);
+        return UnorderedCollectionTypeAdapter.newFactory(constructorConstructor).create(fieldType);
     }
 }

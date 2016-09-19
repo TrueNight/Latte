@@ -9,7 +9,7 @@ import java.util.Iterator;
  * date: 16/05/16
  * time: 16:21
  */
-public class CollectionContainsTypeAdapter<E> implements TypeAdapter<Collection<E>> {
+public class UnorderedCollectionTypeAdapter<E> implements TypeAdapter<Collection<E>> {
 
     public static final TypeAdapterFactory newFactory(final ConstructorConstructor constructorConstructor) {
         return new TypeAdapterFactory() {
@@ -27,7 +27,7 @@ public class CollectionContainsTypeAdapter<E> implements TypeAdapter<Collection<
                 ObjectConstructor<T> constructor = constructorConstructor.get(typeToken);
 
                 @SuppressWarnings({"unchecked", "rawtypes"}) // create() doesn't define a type parameter
-                        TypeAdapter<T> result = new CollectionContainsTypeAdapter(elementType, elementTypeAdapter, constructor);
+                        TypeAdapter<T> result = new UnorderedCollectionTypeAdapter(elementType, elementTypeAdapter, constructor);
 
                 return result;
             }
@@ -37,8 +37,8 @@ public class CollectionContainsTypeAdapter<E> implements TypeAdapter<Collection<
     private final TypeAdapter<E> elementTypeAdapter;
     private final ObjectConstructor<? extends Collection<E>> constructor;
 
-    public CollectionContainsTypeAdapter(Type elementType,
-                                         TypeAdapter<E> elementTypeAdapter, ObjectConstructor<? extends Collection<E>> constructor) {
+    public UnorderedCollectionTypeAdapter(Type elementType,
+                                          TypeAdapter<E> elementTypeAdapter, ObjectConstructor<? extends Collection<E>> constructor) {
         this.elementTypeAdapter =
                 new TypeAdapterRuntimeTypeWrapper<E>(elementTypeAdapter, elementType);
         this.constructor = constructor;

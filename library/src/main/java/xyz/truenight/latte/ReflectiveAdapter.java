@@ -140,8 +140,8 @@ public class ReflectiveAdapter<T> implements TypeAdapter<T> {
     }
 
     private static <E> TypeAdapter<E> getFieldComparator(Field field, TypeToken<E> fieldType) {
-        if (field.isAnnotationPresent(CollectionContains.class)) {
-            return Latte.getInstance().getAnnotationTypeAdapter(fieldType, field.getAnnotation(CollectionContains.class));
+        if (field.isAnnotationPresent(UnorderedCollection.class)) {
+            return Latte.getInstance().getAnnotationTypeAdapter(fieldType, field.getAnnotation(UnorderedCollection.class));
         } else if (field.isAnnotationPresent(UseAdapter.class)) {
             return Latte.getInstance().getAnnotationTypeAdapter(fieldType, field.getAnnotation(UseAdapter.class));
         } else {
