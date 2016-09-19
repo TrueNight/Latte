@@ -19,7 +19,6 @@ Latte provides:
 * [Installation](#installation)
 * [Usage](#usage)
   * [Static Methods](#static-methods)
-    * [Latte.clone(object)](#lattecloneobject)
   * [Annotations](#annotations)
 
 # Installation
