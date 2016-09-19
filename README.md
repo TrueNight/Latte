@@ -72,7 +72,7 @@ Latte.equal(object, clone);
 
 ## Annotations
 
-Use `@IgnoreField, @UseAdapter(Adapter.class), @UnorderedCollection` annotations
+Use `@IgnoreField, @UseAdapter(TypeAdapter.class), @UnorderedCollection` annotations
 to customise Latte's behaviour for individual classes:
 
 ```java
