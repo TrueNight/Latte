@@ -6,7 +6,7 @@ Do you want your data to be `final`? Do you want to safely broadcast to
 different parts of the program?
 
 This usually leads to cloning, which requires writing a copy constructor for
-every model class, and overriding `equal()` for deep equality.
+every model class, and overriding `equals()` for deep equality.
 
 Latte provides:
 
