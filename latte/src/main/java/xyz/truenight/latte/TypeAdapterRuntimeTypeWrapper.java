@@ -21,12 +21,6 @@ public class TypeAdapterRuntimeTypeWrapper<T> implements TypeAdapter<T> {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public boolean equal(T a, T b) {
-        // Order of preference for choosing type adapters
-        // First preference: a type adapter registered for the runtime type
-        // Second preference: a type adapter registered for the declared type
-        // Third preference: reflective type adapter for the runtime type (if it is a sub class of the declared type)
-        // Fourth preference: reflective type adapter for the declared type
-
         TypeAdapter chosen = delegate;
         Type runtimeType = getRuntimeTypeIfMoreSpecific(type, b);
         if (runtimeType != type) {
@@ -49,12 +43,6 @@ public class TypeAdapterRuntimeTypeWrapper<T> implements TypeAdapter<T> {
     @SuppressWarnings("unchecked")
     @Override
     public T clone(T value) {
-        // Order of preference for choosing type adapters
-        // First preference: a type adapter registered for the runtime type
-        // Second preference: a type adapter registered for the declared type
-        // Third preference: reflective type adapter for the runtime type (if it is a sub class of the declared type)
-        // Fourth preference: reflective type adapter for the declared type
-
         TypeAdapter<T> chosen = delegate;
         Type runtimeType = getRuntimeTypeIfMoreSpecific(type, value);
         if (runtimeType != type) {
