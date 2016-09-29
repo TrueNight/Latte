@@ -20,7 +20,7 @@ ext {
     siteUrl = 'https://github.com/TrueNight/Latte'
     gitUrl = 'https://github.com/TrueNight/Latte.git'
 
-    libraryVersion = '1.0'
+    libraryVersion = '1.0.1'
 
     developerId = 'TrueNight'
     developerName = 'Mikhail Frolov'

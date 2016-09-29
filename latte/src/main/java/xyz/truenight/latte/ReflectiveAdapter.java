@@ -59,6 +59,8 @@ public class ReflectiveAdapter<T> implements TypeAdapter<T> {
 
     @Override
     public boolean equal(T a, T b) {
+        Boolean check = Latte.secondaryCheck(a, b);
+        if (check != null) return check;
 
         boolean equal = true;
         try {
@@ -105,7 +107,7 @@ public class ReflectiveAdapter<T> implements TypeAdapter<T> {
             final TypeToken<E> fieldType) {
 
         return new BoundField<E>(name) {
-            final TypeAdapter<E> typeAdapter = getFieldComparator(field, fieldType);
+            final TypeAdapter<E> typeAdapter = getFieldAdapter(field, fieldType);
 
             final boolean isPrimitive = Primitives.isPrimitive(fieldType.getRawType());
 
@@ -117,10 +119,28 @@ public class ReflectiveAdapter<T> implements TypeAdapter<T> {
                 if (annotation != null && annotation.ignoreEqual()) {
                     return true;
                 }
-                Boolean equal = Latte.nullEqual(a, b);
-                if (equal != null) return equal;
 
                 return isEqual(a, b);
+            }
+
+            @SuppressWarnings({"unchecked", "rawtypes"})
+            private boolean isEqual(Object a, Object b) throws IllegalAccessException {
+                Object aValue = field.get(a);
+                Object bValue = field.get(b);
+
+                Boolean equal = Latte.secondaryCheck(a, b);
+                if (equal != null) return equal;
+
+                // check recursive ref
+                if (aValue == a && bValue == b) {
+                    return true;
+                }
+
+                TypeAdapter t =
+                        new TypeAdapterRuntimeTypeWrapper(this.typeAdapter, fieldType.getType());
+
+                // you can recognize this field equal here
+                return t.equal(aValue, bValue);
             }
 
             @SuppressWarnings("unchecked")
@@ -130,27 +150,23 @@ public class ReflectiveAdapter<T> implements TypeAdapter<T> {
                 if (annotation != null && annotation.ignoreClone()) {
                     return;
                 }
-                Object fieldValue = typeAdapter.clone((E) field.get(value));
-                if (fieldValue != null || !isPrimitive) {
-                    field.set(instance, fieldValue);
+                E originalFieldValue = (E) field.get(value);
+                // check recursive ref
+                if (value == originalFieldValue) {
+                    field.set(instance, instance);
+                } else {
+                    TypeAdapter t =
+                            new TypeAdapterRuntimeTypeWrapper(this.typeAdapter, fieldType.getType());
+                    Object fieldValue = t.clone(originalFieldValue);
+                    if (fieldValue != null || !isPrimitive) {
+                        field.set(instance, fieldValue);
+                    }
                 }
-            }
-
-            @SuppressWarnings({"unchecked", "rawtypes"})
-            private boolean isEqual(Object a, Object b) throws IllegalAccessException {
-                Object aValue = field.get(a);
-                Object bValue = field.get(b);
-
-                TypeAdapter t =
-                        new TypeAdapterRuntimeTypeWrapper(this.typeAdapter, fieldType.getType());
-
-                // you can recognize this field equal here
-                return t.equal(aValue, bValue);
             }
         };
     }
 
-    private static <E> TypeAdapter<E> getFieldComparator(Field field, TypeToken<E> fieldType) {
+    private static <E> TypeAdapter<E> getFieldAdapter(Field field, TypeToken<E> fieldType) {
         if (field.isAnnotationPresent(UnorderedCollection.class)) {
             return Latte.getInstance().getAnnotationTypeAdapter(fieldType, field.getAnnotation(UnorderedCollection.class));
         } else if (field.isAnnotationPresent(UseAdapter.class)) {

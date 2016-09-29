@@ -57,8 +57,7 @@ public class UnorderedCollectionTypeAdapter<E> implements TypeAdapter<Collection
 
     @Override
     public boolean equal(Collection<E> a, Collection<E> b) {
-
-        Boolean equal = Latte.nullEqual(a, b);
+        Boolean equal = Latte.secondaryCheck(a, b);
         if (equal != null) return equal;
 
         if (a.size() != b.size()) {

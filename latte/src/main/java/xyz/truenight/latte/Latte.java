@@ -18,6 +18,7 @@ package xyz.truenight.latte;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -77,13 +78,13 @@ public class Latte {
 
     @SuppressWarnings("unchecked")
     private <T> boolean equalInternal(T a, T b) {
-        Boolean equal = nullEqual(a, b);
+        Boolean equal = firstCheck(a, b);
         if (equal != null) return equal;
 
         return ((TypeAdapter<T>) getAdapter(a.getClass())).equal(a, b);
     }
 
-    static <T> Boolean nullEqual(T a, T b) {
+    static <T> Boolean secondaryCheck(T a, T b) {
         if (a == null && b != null) {
             return false;
         }
@@ -93,11 +94,30 @@ public class Latte {
         if (a == b) {
             return true;
         }
+
+        return null;
+    }
+
+    static <T> Boolean firstCheck(T a, T b) {
+        Boolean check = secondaryCheck(a, b);
+        if (check != null) return check;
+
         if (a.getClass() != b.getClass()) {
             return false;
         }
 
         return null;
+    }
+
+    /**
+     * Finds a compatible runtime type if it is more specific
+     */
+    static Type getRuntimeTypeIfMoreSpecific(Type type, Object value) {
+        if (value != null
+                && (type == Object.class || type instanceof TypeVariable<?> || type instanceof Class<?>)) {
+            type = value.getClass();
+        }
+        return type;
     }
 
 
