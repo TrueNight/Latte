@@ -1,3 +1,8 @@
+[![JCenter](https://maven-badges.herokuapp.com/maven-central/xyz.truenight.latte/latte/badge.svg)](https://maven-badges.herokuapp.com/maven-central/xyz.truenight.latte/latte)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/xyz.truenight.latte/latte/badge.svg)](https://maven-badges.herokuapp.com/maven-central/xyz.truenight.latte/latte)
+[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/xyz.truenight.latte/latte/badge.svg)](http://www.javadoc.io/doc/xyz.truenight.latte/latte)
+[![Licence](https://img.shields.io/badge/Licence-Apache2-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+
 # Overview
 
 Latte is a deep equality comparison and object cloning library.
