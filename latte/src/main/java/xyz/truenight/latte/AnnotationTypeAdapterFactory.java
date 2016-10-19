@@ -73,7 +73,7 @@ public final class AnnotationTypeAdapterFactory implements TypeAdapterFactory {
         }
 
         throw new IllegalArgumentException(
-                "@JsonAdapter value must be TypeAdapter or TypeAdapterFactory reference.");
+                "@Adapter value must be TypeAdapter or TypeAdapterFactory reference.");
     }
 
     @SuppressWarnings("unchecked") // Casts guarded by conditionals.

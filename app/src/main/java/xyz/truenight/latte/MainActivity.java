@@ -16,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
         Throwable origin = new Throwable("Ex");
         Throwable th = Latte.clone(origin); // handle recursive reference
 
+        Log.d(TAG, "is ==: " + (origin == th));
         Log.d(TAG, "is equal: " + Latte.equal(origin, th));
         Log.d(TAG, th.toString());
     }

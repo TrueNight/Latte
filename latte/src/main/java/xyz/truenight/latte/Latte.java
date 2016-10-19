@@ -38,11 +38,58 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Latte {
 
     private static final Latte INSTANCE = new Latte();
-    private final AnnotationTypeAdapterFactory annotationTypeAdapterFactory;
-    private final ConstructorConstructor constructorConstructor;
 
     static Latte getInstance() {
         return INSTANCE;
+    }
+
+    /**
+     * This thread local guards against reentrant calls to getAdapter(). In
+     * certain object graphs, creating an adapter for a type may recursively
+     * require an adapter for the same type! Without intervention, the recursive
+     * lookup would stack overflow. We cheat by returning a proxy type adapter.
+     * The proxy is wired up once the initial adapter has been created.
+     */
+    private final ThreadLocal<Map<TypeToken<?>, FutureTypeAdapter<?>>> calls
+            = new ThreadLocal<Map<TypeToken<?>, FutureTypeAdapter<?>>>();
+
+    private final Map<TypeToken<?>, TypeAdapter<?>> typeTokenCache
+            = new ConcurrentHashMap<TypeToken<?>, TypeAdapter<?>>();
+
+    private final List<TypeAdapterFactory> factories;
+
+    private final AnnotationTypeAdapterFactory annotationTypeAdapterFactory;
+
+    private final ConstructorConstructor constructorConstructor;
+
+    private Latte() {
+        constructorConstructor = new ConstructorConstructor(Collections.<Type, InstanceCreator<?>>emptyMap());
+        List<TypeAdapterFactory> factories = new ArrayList<>();
+
+        annotationTypeAdapterFactory = new AnnotationTypeAdapterFactory(constructorConstructor);
+        factories.add(annotationTypeAdapterFactory);
+
+        // type adapters for basic platform types
+        factories.add(TypeAdapters.PRIMITIVE_FACTORY);
+        factories.add(TypeAdapters.STRING_BUILDER_FACTORY);
+        factories.add(TypeAdapters.STRING_BUFFER_FACTORY);
+        factories.add(TypeAdapters.ENUM_FACTORY);
+        factories.add(TypeAdapters.BIG_DECIMAL_FACTORY);
+        factories.add(TypeAdapters.BIG_INTEGER_FACTORY);
+        factories.add(TypeAdapters.URL_FACTORY);
+        factories.add(TypeAdapters.URI_FACTORY);
+        factories.add(TypeAdapters.UUID_FACTORY);
+        factories.add(TypeAdapters.LOCALE_FACTORY);
+        factories.add(TypeAdapters.INET_ADDRESS_FACTORY);
+        factories.add(TypeAdapters.CALENDAR_FACTORY);
+        factories.add(TypeAdapters.CLASS_FACTORY);
+
+        factories.add(ArrayTypeAdapter.FACTORY);
+        factories.add(CollectionTypeAdapter.newFactory(constructorConstructor));
+        factories.add(MapTypeAdapter.newFactory(constructorConstructor));
+        factories.add(ReflectiveAdapter.newFactory(constructorConstructor));
+
+        this.factories = factories;
     }
 
     /**
@@ -120,22 +167,6 @@ public class Latte {
         return type;
     }
 
-
-    /**
-     * This thread local guards against reentrant calls to getAdapter(). In
-     * certain object graphs, creating an adapter for a type may recursively
-     * require an adapter for the same type! Without intervention, the recursive
-     * lookup would stack overflow. We cheat by returning a proxy type adapter.
-     * The proxy is wired up once the initial adapter has been created.
-     */
-    private final ThreadLocal<Map<TypeToken<?>, FutureTypeAdapter<?>>> calls
-            = new ThreadLocal<Map<TypeToken<?>, FutureTypeAdapter<?>>>();
-
-    private final Map<TypeToken<?>, TypeAdapter<?>> typeTokenCache
-            = new ConcurrentHashMap<TypeToken<?>, TypeAdapter<?>>();
-
-    private final List<TypeAdapterFactory> factories;
-
     /**
      * Null-safe equivalent of {@code a.equals(b)}.
      */
@@ -149,35 +180,6 @@ public class Latte {
 
     static String simpleString(Object a) {
         return (a == null) ? null : a.toString();
-    }
-
-    private Latte() {
-        constructorConstructor = new ConstructorConstructor(Collections.<Type, InstanceCreator<?>>emptyMap());
-        List<TypeAdapterFactory> factories = new ArrayList<>();
-
-        // type adapters for basic platform types
-        factories.add(TypeAdapters.PRIMITIVE_FACTORY);
-        factories.add(TypeAdapters.STRING_BUILDER_FACTORY);
-        factories.add(TypeAdapters.STRING_BUFFER_FACTORY);
-        factories.add(TypeAdapters.ENUM_FACTORY);
-        factories.add(TypeAdapters.BIG_DECIMAL_FACTORY);
-        factories.add(TypeAdapters.BIG_INTEGER_FACTORY);
-        factories.add(TypeAdapters.URL_FACTORY);
-        factories.add(TypeAdapters.URI_FACTORY);
-        factories.add(TypeAdapters.UUID_FACTORY);
-        factories.add(TypeAdapters.LOCALE_FACTORY);
-        factories.add(TypeAdapters.INET_ADDRESS_FACTORY);
-        factories.add(TypeAdapters.CALENDAR_FACTORY);
-        factories.add(TypeAdapters.CLASS_FACTORY);
-
-        annotationTypeAdapterFactory = new AnnotationTypeAdapterFactory(constructorConstructor);
-        factories.add(annotationTypeAdapterFactory);
-        factories.add(ArrayTypeAdapter.FACTORY);
-        factories.add(CollectionTypeAdapter.newFactory(constructorConstructor));
-        factories.add(MapTypeAdapter.newFactory(constructorConstructor));
-        factories.add(ReflectiveAdapter.newFactory(constructorConstructor));
-
-        this.factories = factories;
     }
 
     /**
