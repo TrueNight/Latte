@@ -16,7 +16,7 @@ every model class, and overriding `equals()` for deep equality.
 
 Latte provides:
 
-  * Generic cloning that works on every type
+  * Generic deep cloning that works on every type
   * Generic deep equality (value equality) that works on every type
 
 # TOC
