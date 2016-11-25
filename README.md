@@ -92,7 +92,6 @@ public class SomeObject {
   private Object param3;
   
   @UnorderedCollection // element order will be ignored during comparison 
-  // (Same effect as @UseAdapter(UnorderedCollectionTypeAdapter.class))
   private Collection<Object> param4;
   
   private SomeObject() {
