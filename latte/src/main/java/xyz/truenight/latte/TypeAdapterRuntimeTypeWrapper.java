@@ -32,7 +32,7 @@ public class TypeAdapterRuntimeTypeWrapper<T> implements TypeAdapter<T> {
     @Override
     public boolean equal(T a, T b) {
         TypeAdapter chosen = delegate;
-        Type runtimeType = Latte.getRuntimeTypeIfMoreSpecific(type, a);
+        Type runtimeType = Latte.getRuntimeTypeIfMoreSpecific(type, $Types.generalize(a, b));
         if (runtimeType != type) {
             TypeAdapter runtimeTypeAdapter = Latte.getInstance().getAdapter(runtimeType);
             if (!(runtimeTypeAdapter instanceof ReflectiveAdapter)) {

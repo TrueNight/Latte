@@ -39,8 +39,18 @@ public class Latte {
 
     private static final Latte INSTANCE = new Latte();
 
-    static Latte getInstance() {
+    private static boolean msDebug;
+
+    public static synchronized Latte getInstance() {
         return INSTANCE;
+    }
+
+    public static boolean isDebug() {
+        return msDebug;
+    }
+
+    public static void setDebug(boolean debug) {
+        msDebug = debug;
     }
 
     /**
@@ -62,7 +72,7 @@ public class Latte {
 
     private final ConstructorConstructor constructorConstructor;
 
-    private Latte() {
+    public Latte() {
         constructorConstructor = new ConstructorConstructor(Collections.<Type, InstanceCreator<?>>emptyMap());
         List<TypeAdapterFactory> factories = new ArrayList<>();
 
@@ -101,7 +111,7 @@ public class Latte {
      * @return is equal
      */
     public static <T> boolean equal(T a, T b) {
-        return INSTANCE.equalInternal(a, b);
+        return getInstance().equalInternal(a, b);
     }
 
     /**
@@ -112,9 +122,16 @@ public class Latte {
      * @return cloned object
      */
     public static <T> T clone(T value) {
-        return INSTANCE.cloneInternal(value);
+        return getInstance().cloneInternal(value);
     }
 
+    /**
+     * Deep clone
+     *
+     * @param value value
+     * @param <T>   type
+     * @return cloned object
+     */
     @SuppressWarnings("unchecked")
     private <T> T cloneInternal(T value) {
         if (value == null) {
@@ -123,15 +140,24 @@ public class Latte {
         return ((TypeAdapter<T>) getAdapter(value.getClass())).clone(value);
     }
 
+    /**
+     * Deep equal
+     *
+     * @param a   value
+     * @param b   value
+     * @param <T> type
+     * @return is equal
+     */
     @SuppressWarnings("unchecked")
-    private <T> boolean equalInternal(T a, T b) {
-        Boolean equal = firstCheck(a, b);
+    private <T extends B, B> boolean equalInternal(T a, T b) {
+        Boolean equal = check(a, b);
         if (equal != null) return equal;
 
-        return ((TypeAdapter<T>) getAdapter(a.getClass())).equal(a, b);
+        Class<B> baseClass = (Class<B>) $Types.generalize(a, b);
+        return ((TypeAdapter<B>) getAdapter(baseClass)).equal(a, b);
     }
 
-    static <T> Boolean secondaryCheck(T a, T b) {
+    static <T> Boolean check(T a, T b) {
         if (a == null && b != null) {
             return false;
         }
@@ -141,19 +167,22 @@ public class Latte {
         if (a == b) {
             return true;
         }
-
-        return null;
-    }
-
-    static <T> Boolean firstCheck(T a, T b) {
-        Boolean check = secondaryCheck(a, b);
-        if (check != null) return check;
-
-        if (a.getClass() != b.getClass()) {
+        if (isObject(a) && isObject(b)) {
+            return true;
+        }
+        if (isObject($Types.generalize(a, b))) {
             return false;
         }
 
         return null;
+    }
+
+    private static boolean isObject(Class a) {
+        return Object.class.equals(a);
+    }
+
+    private static boolean isObject(Object a) {
+        return isObject(a.getClass());
     }
 
     /**
@@ -163,6 +192,17 @@ public class Latte {
         if (value != null
                 && (type == Object.class || type instanceof TypeVariable<?> || type instanceof Class<?>)) {
             type = value.getClass();
+        }
+        return type;
+    }
+
+    /**
+     * Finds a compatible runtime type if it is more specific
+     */
+    static Type getRuntimeTypeIfMoreSpecific(Type type, Type runtimeType) {
+        if (runtimeType != null
+                && (type == Object.class || type instanceof TypeVariable<?> || type instanceof Class<?>)) {
+            type = runtimeType;
         }
         return type;
     }
@@ -245,7 +285,9 @@ public class Latte {
                 TypeAdapter<T> candidate = factory.create(type);
                 if (candidate != null) {
                     call.setDelegate(candidate);
-                    typeTokenCache.put(type, candidate);
+                    if (!(factory instanceof AnnotationTypeAdapterFactory)) {
+                        typeTokenCache.put(type, candidate);
+                    }
                     return candidate;
                 }
             }
@@ -308,15 +350,32 @@ public class Latte {
      * @param type type
      * @param instanceCreator creator for {@code} type
      */
-    public static void registerInstanceCreator(Type type, InstanceCreator instanceCreator) {
-        INSTANCE.constructorConstructor.register(type, instanceCreator);
+    void registerInstanceCreator(Type type, InstanceCreator instanceCreator) {
+        constructorConstructor.register(type, instanceCreator);
     }
 
     /**
      * Remove instance creator for given type
      * @param type type
      */
-    public static void removeInstanceCreator(Type type) {
-        INSTANCE.constructorConstructor.remove(type);
+    public void removeInstanceCreator(Type type) {
+        constructorConstructor.remove(type);
+    }
+
+    public static class Builder {
+        private Latte latte;
+
+        public Builder() {
+            latte = new Latte();
+        }
+
+        public Builder instanceCreator(Type type, InstanceCreator instanceCreator) {
+            latte.registerInstanceCreator(type, instanceCreator);
+            return this;
+        }
+
+        public Latte create() {
+            return latte;
+        }
     }
 }

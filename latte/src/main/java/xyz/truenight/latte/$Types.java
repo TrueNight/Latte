@@ -121,6 +121,52 @@ public class $Types {
         }
     }
 
+    public static Class<?> getClass(Object value) {
+        return value == null ? null : value.getClass();
+    }
+
+    public static boolean isCollection(Class<?> a) {
+        return Collection.class.isAssignableFrom(a);
+    }
+
+    public static boolean isMap(Class<?> a) {
+        return Map.class.isAssignableFrom(a);
+    }
+
+    public static Class<?> generalize(Object a, Object b) {
+        return generalize(getClass(a), getClass(b));
+    }
+
+    public static Class<?> generalize(Class<?> a, Class<?> b) {
+        if (equal(a, b)) {
+            return a;
+        } else if (a == null && b == null) {
+            return null;
+        } else if (a == null) {
+            return b;
+        } else if (b == null) {
+            return a;
+        } else if (isCollection(a) && isCollection(b)) {
+            return Collection.class;
+        } else if (isMap(a) && isMap(b)) {
+            return Map.class;
+        }
+
+        Class<?> superA = a;
+        while (superA != Object.class) {
+            Class<?> superB = b;
+            while (superB != Object.class) {
+                if (equal(superA, superB)) {
+                    return superA;
+                }
+                superB = superB.getSuperclass();
+            }
+            superA = superA.getSuperclass();
+        }
+
+        return Object.class;
+    }
+
     public static Class<?> getRawType(Type type) {
         if (type instanceof Class<?>) {
             // type is a normal class.

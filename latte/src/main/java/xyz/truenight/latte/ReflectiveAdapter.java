@@ -59,14 +59,16 @@ public class ReflectiveAdapter<T> implements TypeAdapter<T> {
 
     @Override
     public boolean equal(T a, T b) {
-        Boolean check = Latte.secondaryCheck(a, b);
+        Boolean check = Latte.check(a, b);
         if (check != null) return check;
 
         boolean equal = true;
         try {
             for (BoundField boundField : boundFields) {
                 if (!boundField.equal(a, b)) {
-//                    Log.d(TAG, boundField.name + " NOT equal");
+                    if (Latte.isDebug()) {
+                        System.out.println("Latte: \"" + boundField.name + "\" NOT equal");
+                    }
                     if (firstDifference) {
                         return false;
                     }
@@ -128,7 +130,7 @@ public class ReflectiveAdapter<T> implements TypeAdapter<T> {
                 Object aValue = field.get(a);
                 Object bValue = field.get(b);
 
-                Boolean equal = Latte.secondaryCheck(a, b);
+                Boolean equal = Latte.check(a, b);
                 if (equal != null) return equal;
 
                 // check recursive ref
