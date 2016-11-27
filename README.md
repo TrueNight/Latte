@@ -33,7 +33,7 @@ Add `Latte` dependency to your `build.gradle` file:
 
 ```groovy
 dependencies {
-    compile 'xyz.truenight.latte:latte:1.0.2'
+    compile 'xyz.truenight.latte:latte:1.0.3'
 }
 ```
 
@@ -43,7 +43,7 @@ or to your `pom.xml` if you're using Maven:
 <dependency>
   <groupId>xyz.truenight.latte</groupId>
   <artifactId>latte</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
   <type>pom</type>
 </dependency>
 ```
