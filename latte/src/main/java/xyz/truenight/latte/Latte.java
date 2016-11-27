@@ -37,11 +37,15 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Latte {
 
-    private static final Latte INSTANCE = new Latte();
+    private static Latte INSTANCE;
 
     private static boolean msDebug;
 
     public static synchronized Latte getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new Latte();
+        }
+
         return INSTANCE;
     }
 
@@ -111,7 +115,7 @@ public class Latte {
      * @return is equal
      */
     public static <T> boolean equal(T a, T b) {
-        return getInstance().equalInternal(a, b);
+        return getInstance().isEqual(a, b);
     }
 
     /**
@@ -122,7 +126,7 @@ public class Latte {
      * @return cloned object
      */
     public static <T> T clone(T value) {
-        return getInstance().cloneInternal(value);
+        return getInstance().cloneItem(value);
     }
 
     /**
@@ -133,7 +137,7 @@ public class Latte {
      * @return cloned object
      */
     @SuppressWarnings("unchecked")
-    private <T> T cloneInternal(T value) {
+    public <T> T cloneItem(T value) {
         if (value == null) {
             return null;
         }
@@ -149,7 +153,7 @@ public class Latte {
      * @return is equal
      */
     @SuppressWarnings("unchecked")
-    private <T extends B, B> boolean equalInternal(T a, T b) {
+    public <T extends B, B> boolean isEqual(T a, T b) {
         Boolean equal = check(a, b);
         if (equal != null) return equal;
 

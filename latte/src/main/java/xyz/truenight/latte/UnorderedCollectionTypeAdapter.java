@@ -65,11 +65,9 @@ public class UnorderedCollectionTypeAdapter<E> implements TypeAdapter<Collection
         }
 
         Iterator<E> aIterator = a.iterator();
-        Iterator<E> bIterator = b.iterator();
 
         while (aIterator.hasNext()) {
             E aValue = aIterator.next();
-            E bValue = bIterator.next();
 
             if (!contains(b, aValue)) {
                 return false;
